@@ -4,11 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.util.StringUtils;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 /**
@@ -22,6 +22,24 @@ public class LoginController {
 
     @Autowired
     StringRedisTemplate redisTemplate;
+
+
+
+    /**
+     * @param token:
+     * @return String
+     * @description 根据token获取用户信息
+     * @author benjieqiang
+     * @date 2023/7/19 5:34 PM
+     */
+    @ResponseBody
+    @GetMapping("/userInfo")
+    public String getUserInfo(@RequestParam("token") String token) {
+        String s = redisTemplate.opsForValue().get(token);
+        return s;
+    }
+
+
     /**
      * @param :
      * @return String
@@ -30,13 +48,21 @@ public class LoginController {
      * @date 2023/7/19 4:28 PM
      */
     @GetMapping("/login.html")
-    public String login(@RequestParam(value = "redirect_url", required = false) String url, Model model) {
+    public String login(@RequestParam(value = "redirect_url", required = false) String url, Model model,
+                        @CookieValue(value= "sso_token", required = false) String sso_token) {
+        if (!StringUtils.isEmpty(sso_token)) {
+            // 如果不为空，说明之前有人登录过，给浏览器留下了痕迹；
+            // 跳转到回调地址；
+            return "redirect:" + url + "?token=" + sso_token;
+        }
+
         model.addAttribute("url", url); // 接收重定向传递过来的参数，放到model里面。post请求时直接从页面上拿到要回调的地址
         return "login";
     }
 
     @PostMapping("/doLogin")
-    public String doLogin(String username, String password, String url) {
+    public String doLogin(String username, String password, String url,
+                          HttpServletResponse response) {
 
         if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
             // 模拟进行了登录用户和密码的校验，如果校验成功，则跳转回调页面。又重新回到http://127.0.0.1:8081/employees
@@ -45,6 +71,11 @@ public class LoginController {
 
             String uuid = UUID.randomUUID().toString().replace("-", "");
             redisTemplate.opsForValue().set("token", uuid);
+
+            // 为了解决跨域登录的问题，如果购物车服务过来登录成功，服务器存一个cookie，返回给客户端
+            Cookie cookie = new Cookie("sso_token", uuid);
+            response.addCookie(cookie);
+            // 重定向到回调页面
             return "redirect:" + url + "?token=" + uuid;
         }
         return "login";

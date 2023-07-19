@@ -1,8 +1,6 @@
-package com.ben.cart.controller;
+package com.ben.member.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,12 +26,11 @@ public class HelloController {
     @Value("${sso.server.url}")
     String ssoServerUrl;
 
-    @Value("${sso.cart.url}")
-    String cartUrl;
+    @Value("${sso.member.url}")
+    String bossUrl;
 
-
-    @GetMapping("/employees")
-    public String employees(Model model, HttpSession session,
+    @GetMapping("/boss")
+    public String boss(Model model, HttpSession session,
                             @RequestParam(value = "token", required = false) String token) {
 
         if (!StringUtils.isEmpty(token)) {
@@ -42,15 +39,14 @@ public class HelloController {
 //            RestTemplate restTemplate = new RestTemplate();
 //            ResponseEntity<String> forEntity = restTemplate.getForEntity("http://127.0.0.1:8080/userInfo?token=" + token, String.class);
 //            String body = forEntity.getBody();
-//            session.setAttribute("loginUser", body);
             session.setAttribute("loginUser", "哈哈");
-
         }
+
         Object loginUser = session.getAttribute("loginUser");
 
         if (loginUser == null) {
             // 未登录，跳转至服务端的登录页面；
-            return "redirect:" + ssoServerUrl + "?redirect_url=" + cartUrl;
+            return "redirect:" + ssoServerUrl + "?redirect_url=" + bossUrl;
         }
 
         // 否则，显示登录状态，比如去数据库查询一些数据展示到前端；
@@ -59,7 +55,7 @@ public class HelloController {
         emps.add("李四");
         model.addAttribute("emps", emps);
 
-        return "employees";
+        return "boss";
     }
 
 }

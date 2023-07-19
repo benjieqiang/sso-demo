@@ -16,3 +16,6 @@ spring:
 sso:
   server:
     url: http://127.0.0.1:8080/login.html
+
+  member:
+    url: http://127.0.0.1:8082/boss
