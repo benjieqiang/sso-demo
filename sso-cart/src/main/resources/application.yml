@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
@@ -12,3 +12,10 @@ spring:
     host: localhost
   session:
     store-type: redis
+
+sso:
+  server:
+    url: http://127.0.0.1:8080/login.html
+
+  cart:
+    url: http://127.0.0.1:8081/employees
