@@ -70,7 +70,8 @@ public class LoginController {
             // 解决方案：带一个token到回调地址，这样在回调地址对应的方法处进行判断，如果带了token则说明是回调回来的，再请求sso服务器获取用户信息；
 
             String uuid = UUID.randomUUID().toString().replace("-", "");
-            redisTemplate.opsForValue().set("token", uuid);
+            // 把用户信息存起来，key是uuid：val是username
+            redisTemplate.opsForValue().set(uuid, username);
 
             // 为了解决跨域登录的问题，如果购物车服务过来登录成功，服务器存一个cookie，返回给客户端
             Cookie cookie = new Cookie("sso_token", uuid);

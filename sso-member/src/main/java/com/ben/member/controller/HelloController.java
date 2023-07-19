@@ -36,12 +36,13 @@ public class HelloController {
         if (!StringUtils.isEmpty(token)) {
             // 从sso服务器回调回来的
             // 去ssoserver获取当前token真正的用户信息
-//            RestTemplate restTemplate = new RestTemplate();
-//            ResponseEntity<String> forEntity = restTemplate.getForEntity("http://127.0.0.1:8080/userInfo?token=" + token, String.class);
-//            String body = forEntity.getBody();
-            session.setAttribute("loginUser", "哈哈");
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> forEntity = restTemplate.getForEntity("http://127.0.0.1:8080/userInfo?token=" + token, String.class);
+            String body = forEntity.getBody();
+            session.setAttribute("loginUser", body);
+//            session.setAttribute("loginUser", "哈哈");
         }
-
+        System.out.println(session);
         Object loginUser = session.getAttribute("loginUser");
 
         if (loginUser == null) {
